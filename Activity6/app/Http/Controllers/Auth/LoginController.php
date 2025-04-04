@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+
+
+class LoginController
+{
+    public function dashboard(){
+        return view('dashboard');
+    }
+    public function showLoginForm(){
+        return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+       $request->validate([
+        'email' => 'required|string|email',
+        'password' => 'required|string',
+       ]);
+
+       $user = DB::table('users')->where('email', $request->email)->first();
+
+       if($user && Hash::check($request->password, $user->password)){
+        Auth::loginUsingId($user->id);
+        return redirect()->route('dashboard');
+       }
+
+       return back()->withErrors(['email' => 'Invalid Credentials']);
+    }
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return redirect('/login');
+    }
+}
